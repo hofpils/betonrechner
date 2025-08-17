@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Betonrechner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; max-width: 680px; }
+    h1 { font-size: 1.3rem; margin-bottom: 12px; }
+    label { display:block; margin-top:10px; }
+    input { width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px; }
+    button { margin-top:14px; padding:10px; border:0; border-radius:6px; background:#111; color:#fff; }
+    .card { border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:14px; }
+    .hint { font-size:.85rem; color:#555; }
+  </style>
+</head>
+<body>
+  <h1>Betonrechner</h1>
+
+  <label>Länge (cm)<input id="l" type="number" placeholder="250"></label>
+  <label>Breite (cm)<input id="b" type="number" placeholder="120"></label>
+  <label>Höhe/Dicke (cm)<input id="h" type="number" placeholder="20"></label>
+  <label>Dichte (kg/m³)<input id="density" type="number" value="2400"></label>
+  <label>Zuschlag Verschnitt (%)<input id="waste" type="number" value="5"></label>
+
+  <button id="calc">Berechnen</button>
+
+  <div class="card">
+    <div>Volumen: <span id="v">–</span> m³</div>
+    <div>Gewicht: <span id="w">–</span> kg</div>
+  </div>
+
+  <div class="hint">Formel: L×B×H (cm³) ÷ 1.000.000 = m³. Gewicht = Volumen × Dichte.</div>
+
+  <script>
+    const fmt3 = new Intl.NumberFormat('de-DE',{maximumFractionDigits:3});
+    const fmt0 = new Intl.NumberFormat('de-DE',{maximumFractionDigits:0});
+    document.getElementById('calc').onclick = () => {
+      const L = parseFloat(l.value), B = parseFloat(b.value), H = parseFloat(h.value);
+      const rho = parseFloat(density.value)||2400;
+      const wastePct = parseFloat(waste.value)||0;
+      if([L,B,H].some(x=>!x||x<=0)) {v.textContent='–';w.textContent='–';return;}
+      const v0 = L*B*H/1_000_000;
+      const v1 = v0*(1+wastePct/100);
+      const w1 = v1*rho;
+      v.textContent = fmt3.format(v1);
+      w.textContent = fmt0.format(w1);
+    };
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+</body>
+</html>
